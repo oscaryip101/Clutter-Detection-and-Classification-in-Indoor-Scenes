@@ -7,19 +7,18 @@ from .differencing import (
 )
 from .detection import load_yolo, run_yolo
 from .utils import load_image, save_image, draw_boxes
+import numpy as np
 
 
-def run_pipeline(tidy_path, cluttered_path, save_path=None):
-    """
-    Steps:
-    1. Load images
-    2. Align tidy to cluttered
-    3. Compute difference mask
-    4. Run YOLO on cluttered
-    5. Filter YOLO detections by mask
-    6. Draw bounding boxes
-    7. Save output (optional)
-    """
+def run_pipeline(
+    tidy_path,
+    cluttered_path,
+    save_path=None,
+    diff_thresh: int = 20,           # NEW: Differential threshold
+    yolo_conf: float = 0.25,         # NEW: YOLO Confidence threshold
+    yolo_iou: float = 0.45,          # NEW: YOLO NMS IoU threshold
+    overlap_ratio_thresh: float = 0.0  # NEW: The overlap ratio threshold between the differential and the detection box
+):
     """
     Full clutter detection pipeline.
 
@@ -65,7 +64,7 @@ def run_pipeline(tidy_path, cluttered_path, save_path=None):
     # 3. Compute difference mask
     # ------------------------------
     diff_gray = compute_difference_mask(aligned, cluttered)
-    mask = threshold_mask(diff_gray)
+    mask = threshold_mask(diff_gray, thresh=diff_thresh)  # NEW: 使用传入的阈值
     cleaned = clean_mask(mask)
 
     # ------------------------------
@@ -76,7 +75,10 @@ def run_pipeline(tidy_path, cluttered_path, save_path=None):
     # ------------------------------
     # 5. Run YOLO detection on cluttered image
     # ------------------------------
-    yolo_model = load_yolo()
+    yolo_model = load_yolo(
+        conf_threshold=yolo_conf,
+        iou_threshold=yolo_iou
+    )
     yolo_boxes = run_yolo(yolo_model, cluttered)
 
     # ------------------------------
@@ -85,19 +87,27 @@ def run_pipeline(tidy_path, cluttered_path, save_path=None):
     # ------------------------------
     filtered_boxes = []
     for box in yolo_boxes:
-        x, y, w, h, cls_name, conf = box
+        x, y, w, h, cls_id, conf = box
 
         # crop mask
         submask = cleaned[y:y + h, x:x + w]
-        if submask.size > 0 and np.any(submask > 0):  # overlap
-            filtered_boxes.append(box)
+        if submask.size == 0:
+            continue
+
+        if overlap_ratio_thresh <= 0.0:
+            if np.any(submask > 0):
+                filtered_boxes.append(box)
+        else:
+            overlap_ratio = np.count_nonzero(submask > 0) / submask.size
+            if overlap_ratio >= overlap_ratio_thresh:
+                filtered_boxes.append(box)
 
     # ------------------------------
     # 7. Draw boxes
     # ------------------------------
     output = cluttered.copy()
     output = draw_boxes(output, filtered_boxes, color=(0, 255, 0))  # green clutter boxes
-    output = draw_boxes(output, diff_boxes, color=(255, 0, 0))  # blue diff regions
+    output = draw_boxes(output, diff_boxes, color=(255, 0, 0))      # blue diff regions
 
     # ------------------------------
     # 8. Save image (optional)

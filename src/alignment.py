@@ -48,6 +48,10 @@ def match_features(desc1, desc2, ratio=0.75):
     good : list of cv2.DMatch
         Filtered list of reliable feature matches.
     """
+    
+    if desc1 is None or desc2 is None:
+        return []
+    
     # FLANN + Lowe’s ratio test
     index_params = dict(algorithm=1, trees=5)
     search_params = dict(checks=50)
