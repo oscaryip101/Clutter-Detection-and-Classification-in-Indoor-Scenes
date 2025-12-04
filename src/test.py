@@ -4,6 +4,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from src.lighting import correct_lighting
 
 from src.differencing import (
     compute_difference_mask,
@@ -46,6 +47,9 @@ def visualize_diff_pipeline(
 
     if tidy_bgr is None or cluttered_bgr is None:
         raise FileNotFoundError("Could not load tidy or cluttered image.")
+
+    # Adjust tidy image lighting to better match the cluttered image
+    tidy_bgr = correct_lighting(tidy_bgr, cluttered_bgr)
 
     # Convert BGR -> RGB for plotting
     tidy_rgb = cv2.cvtColor(tidy_bgr, cv2.COLOR_BGR2RGB)
@@ -122,8 +126,8 @@ def visualize_diff_pipeline(
 def main():
     # Construct paths relative to the project root (one level above src)
     project_root = os.path.dirname(os.path.dirname(__file__))
-    tidy_path = os.path.join(project_root, "data", "tidy", "1.png")
-    cluttered_path = os.path.join(project_root, "data", "cluttered", "1.png")
+    tidy_path = os.path.join(project_root, "data", "tidy", "10.png")
+    cluttered_path = os.path.join(project_root, "data", "cluttered", "10.png")
 
     os.makedirs(os.path.join(project_root, "data", "output"), exist_ok=True)
 
