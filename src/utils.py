@@ -1,5 +1,6 @@
 import cv2
 import matplotlib.pyplot as plt
+
 def load_image(path):
     """
     Load an image from disk using OpenCV.
@@ -19,6 +20,7 @@ def load_image(path):
         raise FileNotFoundError(f"Could not load image at {path}")
     return img
 
+
 def save_image(path, img):
     """
     Save an image to disk.
@@ -35,28 +37,75 @@ def save_image(path, img):
 
 def draw_boxes(img, boxes, color=(0, 255, 0)):
     """
-    Draw bounding boxes on an image.
+    Draw bounding boxes (and optional labels) on an image.
 
     Parameters
     ----------
     img : np.ndarray
         Image on which to draw.
     boxes : list of tuples
-        Bounding boxes in format (x, y, w, h, *optional_class_info).
+        - For differencing boxes: (x, y, w, h)
+        - For YOLO boxes with class info: (x, y, w, h, cls_id, conf, cls_name)
     color : tuple
         BGR color for the boxes.
 
     Returns
     -------
     img_drawn : np.ndarray
-        Image with drawn boxes.
+        Image with drawn boxes and labels (if available).
     """
     img_drawn = img.copy()
+
     for box in boxes:
-        if len(box) >= 4:
-            x, y, w, h = box[:4]
-            cv2.rectangle(img_drawn, (x, y), (x + w, y + h), color, 2)
+        if len(box) < 4:
+            continue
+
+        x, y, w, h = box[0:4]
+        x = int(x)
+        y = int(y)
+        w = int(w)
+        h = int(h)
+
+        cv2.rectangle(img_drawn, (x, y), (x + w, y + h), color, 2)
+
+        # 如果包含类别名，就在框上方写文字
+        label_text = None
+        if len(box) >= 7:
+            cls_name = str(box[6])
+            conf = box[5]
+            try:
+                label_text = f"{cls_name} {conf:.2f}"
+            except Exception:
+                label_text = cls_name
+
+        if label_text is not None:
+            # 在框上方画一个背景条，防止文字看不清
+            (tw, th), baseline = cv2.getTextSize(
+                label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2
+            )
+            text_x = x
+            text_y = max(0, y - 5)
+
+            cv2.rectangle(
+                img_drawn,
+                (text_x, text_y - th - baseline),
+                (text_x + tw, text_y + baseline),
+                (0, 0, 0),
+                thickness=-1,
+            )
+            cv2.putText(
+                img_drawn,
+                label_text,
+                (text_x, text_y),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (0, 255, 255),
+                2,
+                cv2.LINE_AA,
+            )
+
     return img_drawn
+
 
 def show_image(title, img):
     """

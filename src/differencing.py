@@ -68,7 +68,7 @@ def clean_mask(mask, kernel_size=5):
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)
     return cleaned
 
-def extract_bounding_boxes(mask, iou_thresh=0.3):
+def extract_bounding_boxes(mask,my  iou_thresh=0.3):
     """
     Extract bounding boxes around connected components in the mask and apply
     IoU-based Non-Maximum Suppression (NMS) using OpenCV.
