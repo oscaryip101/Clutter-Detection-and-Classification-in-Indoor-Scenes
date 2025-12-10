@@ -68,7 +68,7 @@ def clean_mask(mask, kernel_size=5):
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)
     return cleaned
 
-def extract_bounding_boxes(mask,my  iou_thresh=0.3):
+def extract_bounding_boxes(mask,iou_thresh=0.3):
     """
     Extract bounding boxes around connected components in the mask and apply
     IoU-based Non-Maximum Suppression (NMS) using OpenCV.
@@ -119,3 +119,46 @@ def extract_bounding_boxes(mask,my  iou_thresh=0.3):
             kept_boxes.append((x, y, w, h))
 
     return kept_boxes
+
+def crop_patches_from_boxes(
+    cluttered_bgr,
+    boxes,
+    margin=5,
+    resize_to=None,
+):
+    """
+    Crop image patches from the cluttered image given bounding boxes.
+
+    Parameters
+    ----------
+    cluttered_bgr : np.ndarray
+        Original cluttered image in BGR format.
+    boxes : list of tuples
+        Bounding boxes as (x, y, w, h).
+    margin : int, optional
+        Extra pixels to pad around each box on all sides.
+    resize_to : tuple or None, optional
+        If not None, resize each patch to (width, height).
+
+    Returns
+    -------
+    patches_bgr : list of np.ndarray
+        List of cropped (and optionally resized) BGR patches.
+    """
+    h_img, w_img = cluttered_bgr.shape[:2]
+    patches = []
+
+    for (x, y, w, h) in boxes:
+        x0 = max(0, x - margin)
+        y0 = max(0, y - margin)
+        x1 = min(w_img, x + w + margin)
+        y1 = min(h_img, y + h + margin)
+
+        patch = cluttered_bgr[y0:y1, x0:x1, :]
+
+        if resize_to is not None:
+            patch = cv2.resize(patch, resize_to, interpolation=cv2.INTER_LINEAR)
+
+        patches.append(patch)
+
+    return patches
