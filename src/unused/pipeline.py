@@ -8,9 +8,9 @@ from src.differencing import (
     clean_mask,
     extract_bounding_boxes,
 )
-from src.detection import load_yolo, run_yolo
+from src.unused.detection import load_yolo, run_yolo
 from src.lighting import correct_lighting
-from src.utils import load_image, save_image, draw_boxes
+from src.unused.utils import load_image, save_image, draw_boxes
 
 
 def box_iou_xywh(box_a, box_b):

@@ -8,7 +8,7 @@ from src.lighting import correct_lighting
 from src.alignment import align_images
 
 # Global toggle: If True, save all figures instead of showing them
-SAVE_IMAGES = True  # Set to True to save all figures instead of showing them
+SAVE_IMAGES = False  # Set to True to save all figures instead of showing them
 
 
 from src.differencing import (
@@ -482,7 +482,7 @@ def main():
 
     # List of test image numbers to evaluate.
     # You can add/remove entries here to control which tidy/cluttered pairs are tested.
-    test_nums_single = ["21"]
+    test_nums_single = ["23"]
     test_nums_display = ["2", "6", "8", "13", "15", "18", "21"]
     test_nums_all = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"]
     test_nums = test_nums_single

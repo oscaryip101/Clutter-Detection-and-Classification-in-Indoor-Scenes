@@ -1,8 +1,8 @@
 # src/eval_pipeline.py
 import os
 from typing import List, Tuple
-from .pipeline import run_pipeline
-from .metrics import compute_prf
+from src.unused.pipeline import run_pipeline
+from src.unused.metrics import compute_prf
 
 GROUND_TRUTH = {
     "1.png": [(100, 120, 60, 80), (250, 200, 40, 50)],
@@ -29,4 +29,4 @@ def eval_once(tidy_dir: str, cluttered_dir: str):
 
 
 if __name__ == "__main__":
-    eval_once("../data/tidy", "../data/cluttered")
+    eval_once("../../data/tidy", "../data/cluttered")
