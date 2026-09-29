@@ -8,14 +8,6 @@ Developed as a team project for **CSCI 5561 at the University of Minnesota**.
 
 **Built with:** Python · OpenCV · NumPy · Matplotlib · Ultralytics YOLO
 
-## Project Preview
-
-![Pipeline visualization showing the reference and cluttered images, difference maps, and final labeled regions](data/final_images/23_diff1_pipeline.png)
-
-*Saved output from the project: reference image, cluttered scene, grayscale difference, thresholded mask, cleaned mask, and final predictions.*
-
-[Browse more examples](data/final_images) · [View classifier training results](src/runs/classify/train_full)
-
 ## The Problem
 
 Recognizing objects alone does not tell us which objects represent clutter. This project uses a tidy image as a baseline to identify changes in the scene, then classifies the objects within those changed regions.
